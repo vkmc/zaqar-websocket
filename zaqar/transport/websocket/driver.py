@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from autobahn.asyncio import websocket
 from oslo.config import cfg
 
 try:
@@ -23,7 +22,9 @@ except ImportError:
 
 from zaqar.i18n import _
 import zaqar.openstack.common.log as logging
+from zaqar.transport.websocket import factory
 from zaqar.transport.websocket import protocol
+
 
 _WS_OPTIONS = (
     cfg.StrOpt('bind', default='127.0.0.1',
@@ -62,12 +63,13 @@ class Driver(object):
                  {'bind': self._ws_conf.bind, 'port': self._ws_conf.port})
 
         uri = 'ws://' + self._ws_conf.bind + ':' + str(self._ws_conf.port)
-        factory = websocket.WebSocketServerFactory(uri,
-                                                   debug=self._ws_conf.debug)
-        factory.protocol = protocol.MessagingProtocol
+
+        fact = factory.ProtocolFactory(uri, debug=self._ws_conf.debug,
+                                       handler=self._api)
+        fact.protocol = protocol.MessagingProtocol
 
         loop = asyncio.get_event_loop()
-        coro = loop.create_server(factory, self._ws_conf.bind,
+        coro = loop.create_server(fact, self._ws_conf.bind,
                                   self._ws_conf.port)
         server = loop.run_until_complete(coro)
 

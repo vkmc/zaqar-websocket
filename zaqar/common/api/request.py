@@ -17,7 +17,7 @@
 import json
 
 from zaqar.common import decorators
-
+from zaqar.transport import utils
 
 class Request(object):
     """General data for a Zaqar request
@@ -48,6 +48,10 @@ class Request(object):
             return json.loads(self._body)
         return None
 
-    def __repr__(self):
-        return "{'api': %s, 'action': %s, 'headers': %s, 'body': %s}" % (
-            self._api, self._action, self._headers, self._body)
+    def to_json(self):
+        api = self._api
+        action = self._action
+        body = self._body
+        headers = self._headers
+
+        return {'api': api, 'action': action, 'headers': headers, 'body': body}

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from zaqar.transport import utils
 
 class Response(object):
     """Common response class for Zaqar.
@@ -36,6 +37,10 @@ class Response(object):
         self._body = body
         self._headers = headers or {}
 
-    def __repr__(self):
-        return "{'req': %s, 'headers': %s, 'body': %s}" % (
-            self._request, self._headers, self._body)
+    def to_json(self):
+        request = self._request.to_json()
+        body = self._body
+        headers = self._headers
+        return utils.to_json({'req': request,
+                              'headers': body,
+                              'body': headers})
